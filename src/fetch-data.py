@@ -1,3 +1,5 @@
+import requests
+
 # simple class to hold stock data
 class Bar:
   def __init__(self, High, EndDate, StartDate, Trades, VWAP, Volume, Currency, UTCOffset, Session, TWAP, Low, StartTime, Close, EndTime, Open, AdjustmentRatio):
@@ -36,17 +38,16 @@ class Bar:
     print('  >> Open:            ' + str(self.Open))
     print('  >> AdjustmentRatio: ' + str(self.AdjustmentRatio))
 
-# get the data from the api hehe
-import requests
-
+# returns the json data returned by the given url
 def get_JSON_from_url(url):
   r = requests.get(url=url)
   return r.json()
 
+# constructs the query string used for the api call
 def get_query_string():
   tokenUrl = 'https://www.investopedia.com/markets/api/token/xignite/encrypted'
   token = get_JSON_from_url(tokenUrl)['token']
-  print('token' + token)
+
   queryStringList = [
     'IdentifierType=Symbol',
     'Identifier=AAPL',
