@@ -1,0 +1,5 @@
+# python files
+src/__pycache__
+
+# osx files
+.DS_Store

@@ -1,42 +1,13 @@
 import requests
+from pymongo import MongoClient
+from Bar import ChartBar
 
-# simple class to hold stock data
-class Bar:
-  def __init__(self, High, EndDate, StartDate, Trades, VWAP, Volume, Currency, UTCOffset, Session, TWAP, Low, StartTime, Close, EndTime, Open, AdjustmentRatio):
-    self.High = High
-    self.EndDate = EndDate
-    self.StartDate = StartDate
-    self.Trades = Trades
-    self.VWAP = VWAP
-    self.Volume = Volume
-    self.Currency = Currency
-    self.UTCOffset = UTCOffset
-    self.Session = Session
-    self.TWAP = TWAP
-    self.Low = Low
-    self.StartTime = StartTime
-    self.Close = Close
-    self.EndTime = EndTime
-    self.Open = Open
-    self.AdjustmentRatio = AdjustmentRatio
-  
-  def print_data(self):
-    print('  >> High:            ' + str(self.High))
-    print('  >> EndDate:         ' + str(self.EndDate))
-    print('  >> StartDate:       ' + str(self.StartDate))
-    print('  >> Trades:          ' + str(self.Trades))
-    print('  >> VWAP:            ' + str(self.VWAP))
-    print('  >> Volume:          ' + str(self.Volume))
-    print('  >> Currency:        ' + str(self.Currency))
-    print('  >> UTCOffset:       ' + str(self.UTCOffset))
-    print('  >> Session:         ' + str(self.Session))
-    print('  >> TWAP:            ' + str(self.TWAP))
-    print('  >> Low:             ' + str(self.Low))
-    print('  >> StartTime:       ' + str(self.StartTime))
-    print('  >> Close:           ' + str(self.Close))
-    print('  >> EndTime:         ' + str(self.EndTime))
-    print('  >> Open:            ' + str(self.Open))
-    print('  >> AdjustmentRatio: ' + str(self.AdjustmentRatio))
+# connect to db
+client = MongoClient('localhost', 27017)
+
+# set up sample db and table
+db = client['test_database']
+table = db['stock_data']
 
 # returns the json data returned by the given url
 def get_JSON_from_url(url):
@@ -69,8 +40,13 @@ chart_bars = apiData['ChartBars']
 # format the data (in progress)
 for n in range(0, len(chart_bars)):
   b = chart_bars[n]
-  # create bar object
-  bar = Bar(
+
+  # insert this chart-bar in the db
+  id = table.insert_one(b).inserted_id
+  print('inserted data: ', id, b)
+
+  # create new chart-bar object (we may not actually need this)
+  bar = ChartBar(
     b['High'],
     b['EndDate'],
     b['StartDate'],
@@ -88,7 +64,9 @@ for n in range(0, len(chart_bars)):
     b['Open'],
     b['AdjustmentRatio'])
 
-  # semi fancy printing
-  print('BAR ' + str(n))
-  bar.print_data()
-  print('\n')
+# print all the inserted items
+for item in table.find({}):
+  print(item)
+
+# clear the table
+table.delete_many({})
