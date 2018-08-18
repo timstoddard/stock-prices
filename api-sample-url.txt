@@ -1,11 +1,74 @@
+NOTE
+This API restricts the number of bars that may be requested per API call. Bar sizes smaller than 1 minute are limited to one week’s worth of data, and bar sizes between 1 minute and 5 minutes are limited to one year’s worth of data. A request error will be returned if you call for bars beyond those limits.
+
+
+1 day
 https://globalquotes.xignite.com/v3/xGlobalQuotes.json/GetChartBars?
-IdentifierType=Symbol&
-Identifier=AAPL&
-StartTime=8%2F9%2F2018+9%3A30+AM&
-EndTime=8%2F9%2F2018+4%3A00+PM&
-AdjustmentMethod=All&
-IncludeExtended=False&
-Precision=Minutes&
-Period=1&
-_token=15B2186D55CB1AEFD12E7C2C2DE9CBB9110DFB516C5307188C5E44131653A7F1F21A023037A60A789E068C4C53E420B5E6777AAF&
-_token_userid=46384
+  IdentifierType=Symbol
+  Identifier=AAPL
+  StartTime=8/17/2018+9:30+AM
+  EndTime=8/17/2018+4:00+PM
+  AdjustmentMethod=All
+  IncludeExtended=False
+  Precision=Minutes
+  Period=1
+
+5 days
+https://globalquotes.xignite.com/v3/xGlobalQuotes.json/GetChartBars?
+  IdentifierType=Symbol
+  Identifier=AAPL
+  StartTime=8/7/2018+4:00+PM
+  EndTime=8/17/2018+4:00+PM
+  AdjustmentMethod=All
+  IncludeExtended=False
+  Precision=Minutes
+  Period=5
+
+1 month
+https://globalquotes.xignite.com/v3/xGlobalQuotes.json/GetChartBars?
+  IdentifierType=Symbol
+  Identifier=AAPL
+  StartTime=7/17/2018+9:30+AM
+  EndTime=8/17/2018+4:00+PM
+  AdjustmentMethod=All
+  IncludeExtended=False
+  Precision=Hours
+  Period=24
+
+6 months
+https://globalquotes.xignite.com/v3/xGlobalQuotes.json/GetChartBars?
+  IdentifierType=Symbol
+  Identifier=AAPL
+  StartTime=2/17/2018+10:30+AM
+  EndTime=8/17/2018+4:00+PM
+  AdjustmentMethod=All
+  IncludeExtended=False
+  Precision=Hours
+  Period=24
+
+1 year
+https://globalquotes.xignite.com/v3/xGlobalQuotes.json/GetChartBars?
+  IdentifierType=Symbol
+  Identifier=AAPL
+  StartTime=8/17/2017+9:30+AM
+  EndTime=8/17/2018+4:00+PM
+  AdjustmentMethod=All
+  IncludeExtended=False
+  Precision=Hours
+  Period=24
+
+5 years
+https://www.xignite.com/xGlobalHistorical.json/GetGlobalHistoricalQuotesRange?
+  IdentifierType=Symbol
+  Identifier=AAPL
+  StartDate=8/17/2013
+  EndDate=8/17/2018
+  AdjustmentMethod=SplitAndProportionalCashDividend
+
+max
+https://www.xignite.com/xGlobalHistorical.json/GetGlobalHistoricalQuotesRange?
+  IdentifierType=Symbol
+  Identifier=AAPL
+  StartDate=1/1/1900
+  EndDate=8/17/2018
+  AdjustmentMethod=SplitAndProportionalCashDividend

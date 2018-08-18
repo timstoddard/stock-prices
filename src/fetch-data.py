@@ -1,72 +1,91 @@
 import requests
 from pymongo import MongoClient
-from Bar import ChartBar
+from urllib.parse import quote_plus
+from datetime import datetime
 
 # connect to db
 client = MongoClient('localhost', 27017)
 
-# set up sample db and table
-db = client['test_database']
-table = db['stock_data']
-
 # returns the json data returned by the given url
-def get_JSON_from_url(url):
+def get_json_from_url(url):
   r = requests.get(url=url)
   return r.json()
 
 # constructs the query string used for the api call
-def get_query_string():
-  tokenUrl = 'https://www.investopedia.com/markets/api/token/xignite/encrypted'
-  token = get_JSON_from_url(tokenUrl)['token']
+def get_query_string(identifier, start_time, end_time):
+  TOKEN_URL = 'https://www.investopedia.com/markets/api/token/xignite/encrypted'
+  token = get_json_from_url(TOKEN_URL)['token']
 
-  queryStringList = [
+  query_string_list = [
     'IdentifierType=Symbol',
-    'Identifier=AAPL',
-    'StartTime=8%2F9%2F2018+9%3A30+AM',
-    'EndTime=8%2F9%2F2018+4%3A00+PM',
+    'Identifier=' + identifier,
+    'StartTime=' + quote_plus(start_time),
+    'EndTime=' + quote_plus(end_time),
     'AdjustmentMethod=All',
     'IncludeExtended=False',
-    'Precision=Minutes',
-    'Period=1',
+    'Precision=Hours',
+    'Period=24',
     '_token=' + token,
     '_token_userid=46384'
   ]
-  return '&'.join(queryStringList)
+  return '&'.join(query_string_list)
 
-apiUrl = 'https://globalquotes.xignite.com/v3/xGlobalQuotes.json/GetChartBars?' + get_query_string()
-apiData = get_JSON_from_url(apiUrl)
-chart_bars = apiData['ChartBars']
+# returns the date and time formatted for the api call
+def get_formatted_datetime(month, day, year):
+  return '{:d}/{:d}/{:d} 9:30AM'.format(month, day, year)
 
-# format the data (in progress)
-for n in range(0, len(chart_bars)):
-  b = chart_bars[n]
+def fill_database(identifier):
+  # define constants
+  API_BASE_URL = 'https://globalquotes.xignite.com/v3/xGlobalQuotes.json/GetChartBars?'
 
-  # insert this chart-bar in the db
-  id = table.insert_one(b).inserted_id
-  print('inserted data: ', id, b)
+  # set up sample db and table
+  db = client['stock_data']
+  table = db[identifier]
 
-  # create new chart-bar object (we may not actually need this)
-  bar = ChartBar(
-    b['High'],
-    b['EndDate'],
-    b['StartDate'],
-    b['Trades'],
-    b['VWAP'],
-    b['Volume'],
-    b['Currency'],
-    b['UTCOffset'],
-    b['Session'],
-    b['TWAP'],
-    b['Low'],
-    b['StartTime'],
-    b['Close'],
-    b['EndTime'],
-    b['Open'],
-    b['AdjustmentRatio'])
+  # clear the table
+  table.delete_many({})
 
-# print all the inserted items
-for item in table.find({}):
-  print(item)
+  # get the current time
+  now = datetime.now()
 
-# clear the table
-table.delete_many({})
+  # define start and end dates
+  end_month = now.month
+  end_year = now.year
+  start_month = end_month
+  start_year = end_year
+  start_date = get_formatted_datetime(start_month, 1, start_year)
+  end_date = get_formatted_datetime(end_month, now.day, end_year)
+
+  # define a variable to hold the api data
+  chart_bars = True
+
+  while (chart_bars != None):
+    # decrement the start/end dates by 1 month
+    end_month = start_month
+    end_year = start_year
+    start_month = end_month - 1
+    if (start_month < 1):
+      start_month = 12
+      start_year = end_year - 1
+    start_date = get_formatted_datetime(start_month, 1, start_year)
+    end_date = get_formatted_datetime(end_month, 1, end_year)
+
+    # fetch data from the api
+    api_url = API_BASE_URL + get_query_string(identifier, start_date, end_date)
+    api_data = get_json_from_url(api_url)
+    chart_bars = api_data['ChartBars']
+    if (chart_bars == None):
+      break
+
+    # insert the data in the db
+    for chart_bar in chart_bars:
+      id = table.insert_one(chart_bar).inserted_id
+      print('inserted data: ', id, chart_bar)
+
+def run():
+  # fill database
+  stock_symbols = ['AAPL']
+  for symbol in stock_symbols:
+    fill_database(symbol)
+
+run()
