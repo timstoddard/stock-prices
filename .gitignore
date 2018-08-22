@@ -1,5 +1,8 @@
 # python files
 src/__pycache__
 
+# stock symbols file
+stock_symbols.txt
+
 # osx files
 .DS_Store

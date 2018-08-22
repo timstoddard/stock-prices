@@ -2,6 +2,7 @@ import requests
 from pymongo import MongoClient
 from urllib.parse import quote_plus
 from datetime import datetime
+from fetch_symbols import write_symbols_to_file
 
 # connect to db
 client = MongoClient('localhost', 27017)
@@ -83,8 +84,15 @@ def fill_database(identifier):
       print('inserted data: ', id, chart_bar)
 
 def run():
+  # get all the stock symbols
+  try:
+    f = open('stock_symbols.txt', 'r')
+  except:
+    write_symbols_to_file()
+    f = open('stock_symbols.txt', 'r')
+
   # fill database
-  stock_symbols = ['AAPL']
+  stock_symbols = f.read().split('\n')
   for symbol in stock_symbols:
     fill_database(symbol)
 

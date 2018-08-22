@@ -2,4 +2,4 @@
 echo "Make sure you have mongod running in a separate terminal/command prompt!"
 
 # run the fetch data script that connects to the db
-python3 src/fetch-data.py
+python3 src/fetch_data.py
