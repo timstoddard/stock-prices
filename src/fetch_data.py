@@ -35,16 +35,16 @@ def get_query_string(identifier, start_time, end_time):
 def get_formatted_datetime(month, day, year):
   return '{:d}/{:d}/{:d} 9:30AM'.format(month, day, year)
 
-def fill_database(identifier):
+def fill_database(symbol):
   # define constants
   API_BASE_URL = 'https://globalquotes.xignite.com/v3/xGlobalQuotes.json/GetChartBars?'
 
   # set up sample db and table
   db = client['stock_data']
-  table = db[identifier]
+  collection = db[symbol]
 
   # clear the table
-  table.delete_many({})
+  collection.delete_many({})
 
   # get the current time
   now = datetime.now()
@@ -72,7 +72,7 @@ def fill_database(identifier):
     end_date = get_formatted_datetime(end_month, 1, end_year)
 
     # fetch data from the api
-    api_url = API_BASE_URL + get_query_string(identifier, start_date, end_date)
+    api_url = API_BASE_URL + get_query_string(symbol, start_date, end_date)
     api_data = get_json_from_url(api_url)
     chart_bars = api_data['ChartBars']
     if (chart_bars == None):
@@ -80,8 +80,8 @@ def fill_database(identifier):
 
     # insert the data in the db
     for chart_bar in chart_bars:
-      id = table.insert_one(chart_bar).inserted_id
-      print('inserted data: ', id, chart_bar)
+      id = collection.insert_one(chart_bar).inserted_id
+      print('inserted data for ',symbol,':', id, chart_bar)
 
 def run():
   # get all the stock symbols
